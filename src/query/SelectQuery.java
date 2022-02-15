@@ -46,9 +46,7 @@ public class SelectQuery  {
 		throw new  UnsupportedOperationException();
 	}
 	
-	public ITable eval(ITable table) {
-		// TODO replace with your code.
-		
+	public ITable eval(ITable table) {		
 //		1. create a result Schema if colName is not null. Use Schema.project method (line 130).
 //		2. create a result table
 //		3. Iterate over all tuple in table given as argument
@@ -57,19 +55,29 @@ public class SelectQuery  {
 //		6. if true -> project from tuple, using Tuple.project method (line 180)
 //		7. return result table.
 		Schema s;
-		if(this.colNames != null) { // result Schema
+		if(this.colNames != null) { // project from tuple, using Tuple.project
 			s = table.getSchema().project(colNames);
-		}else {
-			s = table.getSchema();
-		}
-		ITable tbl = new Table(s); // result table
-		
-		for(Tuple t: table) {
-			if(cond.eval(t) == true) { // project from tuple, using Tuple.project 
-				t.project(s);
+			ITable tbl = new Table(s); // result table
+			
+			for(Tuple t: table) { // create result table
+				if(cond.eval(t)) {
+					tbl.insert(t.project(s));
+				}
 			}
+			return tbl;
+
+		}else {
+			s = table.getSchema(); // colNames is null
+		
+			ITable tbl = new Table(s); // result table
+			
+			for(Tuple t: table) { // create result table
+				if(cond.eval(t)) {
+					tbl.insert(t);
+				}
+			}
+			return tbl;
 		}
-		return tbl;
 	}
 
 	@Override
